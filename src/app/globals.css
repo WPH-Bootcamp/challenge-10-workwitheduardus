@@ -1,10 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@config "../../tailwind.config.ts"
-
-@import "shadcn/tailwind.css";
-
 @custom-variant dark (&:is(.dark *));
 
 /* token figma */
@@ -165,6 +161,7 @@
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.5rem;
 
+  
   /* ========================================== */
   /* COLORS */
   /* ========================================== */
