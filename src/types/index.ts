@@ -3,12 +3,19 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   avatar?: string;
 }
 
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  phone?: string;
+  avatar?: string;
 }
 
 // Restaurant
@@ -41,14 +48,39 @@ export interface GetAllRestaurantsParams {
   search?: string;
   page?: number;
   limit?: number;
+  location?: string;
+  range?: number;
+  priceMin?: number;
+  priceMax?: number;
+  rating?: number;
 }
 
 //  Cart
 export interface CartItem {
+  id: string;
   restaurantId: string;
+  menuId: string;
   name: string;
   quantity: number;
   price: number;
+}
+
+export interface CartGroup {
+  restaurantId: string;
+  restaurantName: string;
+  items: CartItem[];
+}
+
+export type CartResponse = CartGroup[];
+
+export interface AddToCartPayload {
+  restaurantId: string;
+  menuId: string;
+  quantity: number;
+}
+
+export interface UpdateCartPayload {
+  quantity: number;
 }
 
 // Order
@@ -65,4 +97,58 @@ export interface Order {
   total: number;
   status: OrderStatus;
   createdAt: string;
+}
+
+// Post
+export interface CheckoutItem {
+  menuId: string;
+  quantity: number;
+}
+
+export interface CheckoutRestaurant {
+  restaurantId: string;
+  items: CheckoutItem[];
+}
+
+export interface CheckoutPayload {
+  restaurants: CheckoutRestaurant[];
+  deliveryAddress: string;
+  phone?: string;
+  paymentMethod?: string;
+  notes?: string;
+}
+
+export interface GetMyOrdersParams {
+  status?: OrderStatus;
+  page?: number;
+  limit?: number;
+}
+
+// Review
+export interface Review {
+  id: string;
+  restaurantId: string;
+  transactionId: string;
+  star: number;
+  comment: string;
+  menuIds?: string[];
+  createdAt: string;
+}
+
+export interface CreateReviewPayload {
+  transactionId: string;
+  restaurantId: string;
+  star: number;
+  comment: string;
+  menuIds?: string[];
+}
+
+export interface UpdateReviewPayload {
+  star?: number;
+  comment?: string;
+}
+
+export interface GetReviewsParams {
+  page?: number;
+  limit?: number;
 }

@@ -1,7 +1,6 @@
 import api from "./axios";
 import type { Restaurant, GetAllRestaurantsParams } from "@/types";
 
-
 export const restoApi = {
   getRecommended: (): Promise<Restaurant[]> =>
     api.get<Restaurant[]>("/restaurants/recommended").then((r) => r.data),
