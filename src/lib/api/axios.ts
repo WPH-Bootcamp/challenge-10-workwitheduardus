@@ -7,7 +7,6 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Inject token on every request
 api.interceptors.request.use((config) => {
   const { token } = useAuthStore.getState() as AuthState;
   if (token) config.headers.Authorization = `Bearer ${token}`;
