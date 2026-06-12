@@ -6,12 +6,12 @@ import CategoryCard from "@/components/shared/CategoryCard";
 import type { Category } from "@/types";
 
 const CATEGORIES: Category[] = [
-  { id: "all", label: "All Restaurant", icon: "/asset/All-Restaurant.svg" },
-  { id: "nearby", label: "Nearby", icon: "/asset/Location.svg" },
-  { id: "discount", label: "Discount", icon: "/asset/Discount.svg" },
-  { id: "bestseller", label: "Best Seller", icon: "/asset/Best-Seller.svg" },
-  { id: "delivery", label: "Delivery", icon: "/asset/Delivery.svg" },
-  { id: "lunch", label: "Lunch", icon: "/asset/Lunch.svg" },
+  { id: "all", label: "All Restaurant", icon: "/All-Restaurant.svg" },
+  { id: "nearby", label: "Nearby", icon: "/Location.svg" },
+  { id: "discount", label: "Discount", icon: "/Discount.svg" },
+  { id: "bestseller", label: "Best Seller", icon: "/Best-Seller.svg" },
+  { id: "delivery", label: "Delivery", icon: "/Delivery.svg" },
+  { id: "lunch", label: "Lunch", icon: "/Lunch.svg" },
 ];
 
 interface CategoryCarouselProps {

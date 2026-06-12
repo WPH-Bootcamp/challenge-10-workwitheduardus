@@ -30,7 +30,7 @@ export default function Header({ scrolled = false }: HeaderProps) {
       >
         <div className="relative w-[42px] h-[42px] flex-shrink-0">
           <Image
-            src="/asset/logo.svg"
+            src={scrolled ? "/Logo-red.svg" : "/Logo-white.svg"}
             alt="Foody"
             fill
             className="object-contain"
