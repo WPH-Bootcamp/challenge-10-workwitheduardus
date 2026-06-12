@@ -5,7 +5,7 @@ interface SearchBarProps {
 
 export default function SearchBar({ value = "", onChange }: SearchBarProps) {
   return (
-    <div className="flex items-center gap-1.5 w-[604px] h-14 px-6 bg-white rounded-[--radius-full]">
+    <div className="flex items-center gap-1.5 w-full lg:w-[604px] h-12 lg:h-14 px-5 lg:px-6 bg-white rounded-full shadow-md">
       <svg
         width="20"
         height="20"
@@ -21,13 +21,15 @@ export default function SearchBar({ value = "", onChange }: SearchBarProps) {
           strokeLinecap="round"
         />
       </svg>
+
       <input
         type="text"
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder="Search restaurants, food and drink"
-        className="flex-1 text-md-regular leading-[30px] tracking-[-0.02em] text-neutral-600 placeholder:text-neutral-500 bg-transparent outline-none"
+        className="flex-1 text-[16px] font-normal leading-[30px] tracking-[-0.02em] text-neutral-600 placeholder:text-neutral-500 bg-transparent outline-none"
       />
     </div>
   );
 }
+ 

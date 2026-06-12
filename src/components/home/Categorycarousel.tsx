@@ -46,14 +46,16 @@ export default function CategoryCarousel({
 
   return (
     <div className="flex items-center gap-4 w-full">
+      {/* Left scroll button */}
       <button
         onClick={() => scroll("left")}
         disabled={!canL}
         aria-label="Scroll categories left"
-        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-[--radius-full] bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
+        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
       >
         <ChevronLeft className="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
       </button>
+      
       <div
         ref={ref}
         onScroll={sync}
@@ -69,11 +71,13 @@ export default function CategoryCarousel({
           />
         ))}
       </div>
+
+      {/* Right scroll button */}
       <button
         onClick={() => scroll("right")}
         disabled={!canR}
         aria-label="Scroll categories right"
-        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-[--radius-full] bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
+        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
       >
         <ChevronRight className="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
       </button>

@@ -11,12 +11,13 @@ import RecommendedSection from "../../components/home/Recommendedsection";
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState("");
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 700);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+ useEffect(() => {
+   const onScroll = () => setScrolled(window.scrollY > 700);
+   window.addEventListener("scroll", onScroll, { passive: true });
+   return () => window.removeEventListener("scroll", onScroll);
+ }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -24,17 +25,17 @@ export default function HomePage() {
         <Header scrolled={scrolled} />
       </div>
 
-      <HomeHero />
+      <HomeHero searchValue={searchValue} onSearchChange={setSearchValue} />
 
       <main className="flex-1 flex flex-col">
-        <section className="w-full px-[120px] py-8">
+        <section className="w-full px-4 lg:px-[120px] py-8">
           <CategoryCarousel
             selectedId={selectedCategory}
             onSelect={setSelectedCategory}
           />
         </section>
 
-        <section className="w-full px-[120px] pt-4 pb-20">
+        <section className="w-full px-4 lg:px-[120px] pt-4 pb-20">
           <RecommendedSection categoryId={selectedCategory} />
         </section>
       </main>

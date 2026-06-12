@@ -17,8 +17,7 @@ export default function Header({ scrolled = false }: HeaderProps) {
   return (
     <header
       className={[
-        "w-full h-20 flex items-center justify-between px-[120px]",
-        "transition-all duration-300",
+        "w-full h-16 lg:h-20 flex items-center justify-between px-4 lg:px-[120px] transition-all duration-300",
         scrolled
           ? "bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)]"
           : "bg-transparent",
@@ -26,21 +25,20 @@ export default function Header({ scrolled = false }: HeaderProps) {
     >
       <Link
         href="/"
-        className="flex items-center gap-[15px] w-[149px] h-[42px]"
+        className="flex items-center gap-[15px] w-[149px] h-[42px] flex-shrink-0"
       >
         <div className="relative w-[42px] h-[42px] flex-shrink-0">
           <Image
             src={scrolled ? "/Logo-red.svg" : "/Logo-white.svg"}
             alt="Foody"
             fill
+            sizes="42px"
             className="object-contain"
           />
         </div>
         <span
-          className={[
-            "display-md-extrabold leading-[42px]",
-            scrolled ? "text-neutral-950" : "text-white",
-          ].join(" ")}
+          style={{ fontSize: "32px", fontWeight: 800, lineHeight: "42px" }}
+          className={scrolled ? "text-[#0A0D12]" : "text-[#FDFDFD]"}
         >
           Foody
         </span>
@@ -51,14 +49,12 @@ export default function Header({ scrolled = false }: HeaderProps) {
         <div className="flex items-center gap-6 w-[193px] h-12">
           <Link href="/cart" className="relative flex-shrink-0 w-8 h-8">
             <ShoppingBag
-              className={[
-                "w-8 h-8",
-                scrolled ? "text-neutral-950" : "text-white",
-              ].join(" ")}
+              size={32}
               strokeWidth={1.75}
+              className={scrolled ? "text-neutral-950" : "text-white"}
             />
             {count > 0 && (
-              <span className="absolute top-[7px] left-[18px] w-5 h-5 bg-primary rounded-[--radius-full] flex items-center justify-center text-xs-bold text-white leading-none">
+              <span className="absolute top-[7px] left-[18px] w-5 h-5 bg-[#C12116] rounded-full flex items-center justify-center text-[12px] font-bold leading-none text-white">
                 {count > 9 ? "9+" : count}
               </span>
             )}
@@ -69,16 +65,23 @@ export default function Header({ scrolled = false }: HeaderProps) {
               {user?.avatar && (
                 <Image
                   src={user.avatar}
-                  alt={user.name}
+                  alt={user.name ?? "User"}
                   fill
+                  sizes="48px"
                   className="object-cover"
                 />
               )}
             </div>
             <span
+              style={{
+                fontSize: "18px",
+                fontWeight: 600,
+                lineHeight: "32px",
+                letterSpacing: "-0.02em",
+              }}
               className={[
-                "text-lg-semibold leading-8 tracking-[-0.02em]",
-                scrolled ? "text-neutral-950" : "text-white",
+                "truncate",
+                scrolled ? "text-[#0A0D12]" : "text-white",
               ].join(" ")}
             >
               {user?.name ?? "User"}
@@ -89,24 +92,34 @@ export default function Header({ scrolled = false }: HeaderProps) {
         <div className="flex items-center gap-4 h-12">
           <Link
             href="/login"
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              lineHeight: "30px",
+              letterSpacing: "-0.02em",
+            }}
             className={[
-              "flex items-center justify-center w-[163px] h-12 rounded-[--radius-full]",
-              "border-2 text-md-bold transition-colors",
+              "flex items-center justify-center px-4 lg:px-8 h-10 lg:h-12 rounded-[100px] transition-colors",
               scrolled
-                ? "border-neutral-300 text-neutral-950 hover:bg-neutral-50"
-                : "border-white       text-white        hover:bg-white/10",
+                ? "border-2 border-[#D5D7DA] text-[#0A0D12] hover:bg-neutral-50"
+                : "border-2 border-[#D5D7DA] text-white       hover:bg-white/10",
             ].join(" ")}
           >
-            Login
+            Sign In
           </Link>
           <Link
             href="/register"
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              lineHeight: "30px",
+              letterSpacing: "-0.02em",
+            }}
             className={[
-              "flex items-center justify-center w-[163px] h-12 rounded-[--radius-full]",
-              "text-md-bold transition-colors",
+              "flex items-center justify-center px-4 lg:px-8 h-10 lg:h-12 rounded-[100px] transition-colors",
               scrolled
-                ? "bg-primary text-white       hover:bg-red-700"
-                : "bg-white   text-neutral-950 hover:bg-neutral-100",
+                ? "bg-[#C12116] text-white       hover:bg-red-700"
+                : "bg-white     text-[#0A0D12]   hover:bg-neutral-100",
             ].join(" ")}
           >
             Sign Up

@@ -99,50 +99,49 @@ const SOCIALS = [
  
 export default function Footer() {
   return (
-    <footer className="w-full h-[490px] bg-neutral-950 border-t border-neutral-300">
-      <div className="flex justify-between items-start px-[120px] py-20 gap-[69px]">
-        {/*  Col 1: Content Container  */}
-        <div className="flex flex-col gap-10 w-[380px] h-[284px]">
-          <div className="flex flex-col gap-[22px] w-[380px] h-[154px]">
+    <footer className="w-full bg-[#0A0D12] border-t border-[#D5D7DA]">
+      <div className="flex flex-col lg:flex-row justify-between items-start px-6 lg:px-[120px] py-12 lg:py-20 gap-10 lg:gap-[69px]">
+        <div className="flex flex-col gap-10 w-full lg:w-[380px]">
+          <div className="flex flex-col gap-[22px]">
             <Link
               href="/"
               className="flex items-center gap-[15px] w-[149px] h-[42px]"
             >
               <div className="relative w-[42px] h-[42px] flex-shrink-0">
                 <Image
-                  src="/asset/logo.svg"
+                  src="/Logo-white.svg"
                   alt="Foody"
                   fill
+                  sizes="42px"
                   className="object-contain"
                 />
               </div>
-              <span className="display-md-extrabold leading-[42px] text-white">
+              <span className="font-extrabold text-[32px] leading-[42px] text-white">
                 Foody
               </span>
             </Link>
 
-            <p className="text-md-regular leading-[1.875rem] tracking-[-0.02em] text-neutral-25 w-[380px] h-[90px]">
+            <p className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-[#FDFDFD] w-[380px]">
               Enjoy homemade flavors &amp; chef&apos;s signature dishes. Freshly
               prepared every day. Order online or visit us at the nearest
-              restaurant.
+              branch.
             </p>
           </div>
 
-          <div className="flex flex-col justify-center gap-5 w-[196px] h-[90px]">
-            <div className="flex items-center gap-2 w-[196px] h-[30px]">
-              <p className="text-md-extrabold text-neutral-25 text-center w-[176px]">
-                Follow us on Social Media
-              </p>
-            </div>
+          <div className="flex flex-col justify-center gap-5 w-[196px]">
+            <p className="font-extrabold text-[16px] leading-[30px] text-[#FDFDFD]">
+              Follow on Social Media
+            </p>
 
             <div className="flex items-center gap-3 w-[196px] h-10">
-              {SOCIALS.map(({ Icon, href }) => (
+              {SOCIALS.map(({ Icon, href, label }) => (
                 <a
                   key={href}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 flex items-center justify-center border border-neutral-800 rounded-[--radius-full] text-white hover:border-neutral-500 transition-colors flex-shrink-0"
+                  aria-label={label}
+                  className="w-10 h-10 flex items-center justify-center border border-[#252B37] rounded-full text-white hover:border-neutral-500 transition-colors flex-shrink-0"
                 >
                   <Icon />
                 </a>
@@ -151,18 +150,16 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Col 2: E-Commerce / Explore Menu*/}
-        <div className="flex flex-col gap-5 w-[200px] h-[330px]">
-          <h4 className="text-md-extrabold text-neutral-25 text-center">
+        <div className="flex flex-col gap-5 w-full lg:w-[200px]">
+          <p className="font-extrabold text-[16px] leading-[30px] text-center text-[#FDFDFD]">
             Explore
-          </h4>
-
+          </p>
           <nav className="flex flex-col gap-5">
             {EXPLORE.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-md-regular tracking-[-0.02em] text-neutral-25 h-[30px] flex items-center hover:text-white transition-colors"
+                className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-center text-[#FDFDFD] h-[30px] flex items-center justify-center hover:text-white transition-colors"
               >
                 {l.label}
               </Link>
@@ -170,18 +167,16 @@ export default function Footer() {
           </nav>
         </div>
 
-        {/* Col 3: Help Menu*/}
-        <div className="flex flex-col gap-5 w-[200px] h-[280px]">
-          <h4 className="text-md-extrabold text-neutral-25 text-center">
+        <div className="flex flex-col gap-5 w-full lg:w-[200px]">
+          <p className="font-extrabold text-[16px] leading-[30px] text-center text-[#FDFDFD]">
             Help
-          </h4>
-
+          </p>
           <nav className="flex flex-col gap-5">
             {HELP.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-md-regular tracking-[-0.02em] text-neutral-25 h-[30px] flex items-center hover:text-white transition-colors"
+                className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-center text-[#FDFDFD] h-[30px] flex items-center justify-center hover:text-white transition-colors"
               >
                 {l.label}
               </Link>

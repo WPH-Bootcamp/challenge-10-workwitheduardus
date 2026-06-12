@@ -17,10 +17,22 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const url: string = err.config?.url ?? "";
+    const status: number = err.response?.status;
+
+    const isAuthRequired =
+      url.includes("/api/auth/profile") ||
+      url.includes("/api/cart") ||
+      url.includes("/api/order") ||
+      url.includes("/api/review");
+
+    if (status === 401 && isAuthRequired) {
       (useAuthStore.getState() as AuthState).clearAuth();
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
+
     return Promise.reject(err);
   },
 );

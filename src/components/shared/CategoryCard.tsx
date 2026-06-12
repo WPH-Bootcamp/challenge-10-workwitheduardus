@@ -22,11 +22,11 @@ export default function CategoryCard({
         isSelected ? "scale-105" : "",
       ].join(" ")}
     >
-      {/* Icon box */}
+      {/* Icon box  */}
       <div
         className={[
           "w-[161px] h-[100px] flex items-center justify-center p-2 gap-2",
-          "rounded-[--radius-2xl] shadow-[0px_0px_20px_rgba(203,202,202,0.25)]",
+          "rounded-2xl shadow-[0px_0px_20px_rgba(203,202,202,0.25)]",
           "transition-all duration-200",
           isSelected
             ? "bg-white ring-2 ring-primary"
@@ -39,6 +39,7 @@ export default function CategoryCard({
             src={category.icon}
             alt={category.label}
             fill
+            sizes="65px"
             className="object-contain"
           />
         </div>
@@ -57,3 +58,4 @@ export default function CategoryCard({
     </button>
   );
 }
+ 
