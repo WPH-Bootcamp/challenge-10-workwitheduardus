@@ -20,19 +20,19 @@ export interface UpdateProfilePayload {
 
 // Restaurant
 export interface Restaurant {
-   id:           string;
-  name:         string;
-  image:        string;
-  logo?:        string;
-  images?:      string[];
-  star?:        number;
-  rating?:      number;
-  place?:       string;
-  location?:    string;
-  distance?:    string;
-  category?:    string;
+  id:string;
+  name:string;
+  image:string;
+  logo?:string;
+  images?:string[];
+  star?:number;
+  rating?:number;
+  place?:string;
+  location?:string;
+  distance?:string;
+  category?:string;
   reviewCount?: number;
-  menuCount?:   number;
+  menuCount?:number;
   priceRange?:  { min: number; max: number };
 }
 
