@@ -99,90 +99,84 @@ const SOCIALS = [
  
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#0A0D12] border-t border-[#D5D7DA]">
-      <div className="flex flex-col lg:flex-row justify-between items-start px-6 lg:px-[120px] py-12 lg:py-20 gap-10 lg:gap-[69px]">
-        <div className="flex flex-col gap-10 w-full lg:w-[380px]">
+     <footer className="w-full bg-[#0A0D12] border-t border-[#D5D7DA]">
+      <div className="flex flex-col lg:flex-row justify-between items-start px-6 lg:px-[120px] py-10 lg:py-20 gap-10 lg:gap-[69px]">
+ 
+        {/* ── Col 1: Brand + Description + Social ── */}
+        <div className="flex flex-col gap-8 lg:gap-10 w-full lg:w-[380px]">
+ 
+          {/* Logo + Description */}
           <div className="flex flex-col gap-[22px]">
-            <Link
-              href="/"
-              className="flex items-center gap-[15px] w-[149px] h-[42px]"
-            >
+            <Link href="/" className="flex items-center gap-[15px]">
               <div className="relative w-[42px] h-[42px] flex-shrink-0">
-                <Image
-                  src="/Logo-white.svg"
-                  alt="Foody"
-                  fill
-                  sizes="42px"
-                  className="object-contain"
-                />
+                <Image src="/Logo-red.svg" alt="Foody" fill sizes="42px" className="object-contain" />
               </div>
-              <span className="font-extrabold text-[32px] leading-[42px] text-white">
+              <span style={{ fontSize: '32px', fontWeight: 800, lineHeight: '42px' }} className="text-white">
                 Foody
               </span>
             </Link>
-
-            <p className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-[#FDFDFD] w-[380px]">
-              Enjoy homemade flavors &amp; chef&apos;s signature dishes. Freshly
-              prepared every day. Order online or visit us at the nearest
-              branch.
+ 
+            <p style={{ fontSize: '16px', fontWeight: 400, lineHeight: '30px', letterSpacing: '-0.02em' }}
+               className="text-[#FDFDFD] w-full lg:w-[380px]">
+              Enjoy homemade flavors &amp; chef&apos;s signature dishes.
+              Freshly prepared every day. Order online or visit us
+              at the nearest branch.
             </p>
           </div>
-
-          <div className="flex flex-col justify-center gap-5 w-[196px]">
-            <p className="font-extrabold text-[16px] leading-[30px] text-[#FDFDFD]">
+ 
+          {/* Social Media */}
+          <div className="flex flex-col gap-5 w-[196px]">
+            <p style={{ fontSize: '16px', fontWeight: 800, lineHeight: '30px' }} className="text-[#FDFDFD]">
               Follow on Social Media
             </p>
-
-            <div className="flex items-center gap-3 w-[196px] h-10">
+            <div className="flex items-center gap-3">
               {SOCIALS.map(({ Icon, href, label }) => (
-                <a
-                  key={href}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="w-10 h-10 flex items-center justify-center border border-[#252B37] rounded-full text-white hover:border-neutral-500 transition-colors flex-shrink-0"
-                >
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                   className="w-10 h-10 flex items-center justify-center border border-[#252B37] rounded-full text-white hover:border-neutral-500 transition-colors flex-shrink-0">
                   <Icon />
                 </a>
               ))}
             </div>
           </div>
         </div>
-
-        <div className="flex flex-col gap-5 w-full lg:w-[200px]">
-          <p className="font-extrabold text-[16px] leading-[30px] text-center text-[#FDFDFD]">
-            Explore
-          </p>
-          <nav className="flex flex-col gap-5">
-            {EXPLORE.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-center text-[#FDFDFD] h-[30px] flex items-center justify-center hover:text-white transition-colors"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
+ 
+        <div className="grid grid-cols-2 lg:flex lg:flex-row lg:gap-[69px] gap-8 w-full lg:w-auto">
+ 
+          {/* ── Col 2: Explore ── */}
+          <div className="flex flex-col gap-5 lg:w-[200px]">
+            <p style={{ fontSize: '16px', fontWeight: 800, lineHeight: '30px' }}
+               className="text-left text-[#FDFDFD]">
+              Explore
+            </p>
+            <nav className="flex flex-col gap-4 lg:gap-5">
+              {EXPLORE.map((l) => (
+                <Link key={l.href + l.label} href={l.href}
+                      style={{ fontSize: '16px', fontWeight: 400, lineHeight: '30px', letterSpacing: '-0.02em' }}
+                      className="text-left text-[#FDFDFD] hover:text-white transition-colors">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+ 
+          {/* ── Col 3: Help ── */}
+          <div className="flex flex-col gap-5 lg:w-[200px]">
+            <p style={{ fontSize: '16px', fontWeight: 800, lineHeight: '30px' }}
+               className="text-left text-[#FDFDFD]">
+              Help
+            </p>
+            <nav className="flex flex-col gap-4 lg:gap-5">
+              {HELP.map((l) => (
+                <Link key={l.href + l.label} href={l.href}
+                      style={{ fontSize: '16px', fontWeight: 400, lineHeight: '30px', letterSpacing: '-0.02em' }}
+                      className="text-left text-[#FDFDFD] hover:text-white transition-colors">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
-
-        <div className="flex flex-col gap-5 w-full lg:w-[200px]">
-          <p className="font-extrabold text-[16px] leading-[30px] text-center text-[#FDFDFD]">
-            Help
-          </p>
-          <nav className="flex flex-col gap-5">
-            {HELP.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="font-normal text-[16px] leading-[30px] tracking-[-0.02em] text-center text-[#FDFDFD] h-[30px] flex items-center justify-center hover:text-white transition-colors"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+ 
       </div>
     </footer>
   );

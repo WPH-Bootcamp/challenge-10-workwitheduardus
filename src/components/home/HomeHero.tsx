@@ -29,27 +29,28 @@ export default function HomeHero({
         }}
       />
 
-      <div
-        className="absolute inset-0 flex flex-col items-center justify-center px-6
-        lg:inset-auto lg:left-1/2 lg:-translate-x-1/2 lg:flex lg:flex-col lg:items-center
-        lg:gap-10"
-        style={{ ["--lg-top" as string]: "326px" }}
-      >
-        <div className="flex flex-col items-center gap-2 lg:gap-2 w-full max-w-[712px] lg:w-[712px]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 pt-6 lg:pt-0 lg:justify-start">
+        <div className="hidden lg:block" style={{ height: "246px" }} />
+
+        {/* Text block */}
+        <div className="flex flex-col items-center gap-2 w-full max-w-[712px]">
           <h1
-            className="font-extrabold text-center text-white w-full"
-            style={{ fontSize: "48px", lineHeight: 1.25, fontWeight: 800 }}
+            className="font-extrabold text-center text-white"
+            style={{ fontSize: "clamp(24px, 4vw, 48px)", lineHeight: 1.25 }}
           >
-            <span className="text-[28px] lg:text-[48px]">
-              Explore Culinary Experiences
-            </span>
+            Explore Culinary Experiences
           </h1>
-          <p className="font-bold text-center text-white text-[14px] lg:text-[24px] lg:leading-9 w-full">
+          <p
+            className="font-bold text-center text-white"
+            style={{ fontSize: "clamp(14px, 2vw, 24px)", lineHeight: 1.5 }}
+          >
             Search and refine your choice to discover the perfect restaurant.
           </p>
         </div>
 
-        <div className="h-4 lg:h-10" />
+        {/* Gap between text and search */}
+        <div className="h-2 lg:h-4" />
+
         <SearchBar value={searchValue} onChange={onSearchChange} />
       </div>
     </section>

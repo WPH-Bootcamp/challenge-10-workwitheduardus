@@ -45,22 +45,25 @@ export default function CategoryCarousel({
     });
 
   return (
-    <div className="flex items-center gap-4 w-full">
+    <div className="flex items-center gap-2 lg:gap-4 w-full">
       {/* Left scroll button */}
       <button
         onClick={() => scroll("left")}
         disabled={!canL}
-        aria-label="Scroll categories left"
-        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
+        aria-label="Scroll left"
+        className="w-8 h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
       >
-        <ChevronLeft className="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
+        <ChevronLeft
+          className="w-4 h-4 lg:w-5 lg:h-5 text-neutral-950"
+          strokeWidth={2.5}
+        />
       </button>
-      
+
       <div
         ref={ref}
         onScroll={sync}
-        className="flex gap-[53px] overflow-x-auto"
-        style={{ scrollbarWidth: "none" }}
+        className="flex  gap-3 lg:gap-[53px] overflow-x-auto flex-1"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {CATEGORIES.map((cat) => (
           <CategoryCard
@@ -76,10 +79,10 @@ export default function CategoryCarousel({
       <button
         onClick={() => scroll("right")}
         disabled={!canR}
-        aria-label="Scroll categories right"
-        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
+        aria-label="Scroll right"
+        className="w-8 h-8 lg:w-10 lg:h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-white shadow-[0px_0px_20px_rgba(203,202,202,0.25)] disabled:opacity-30 hover:shadow-lg transition-shadow"
       >
-        <ChevronRight className="w-5 h-5 text-neutral-950" strokeWidth={2.5} />
+        <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-neutral-950" strokeWidth={2.5} />
       </button>
     </div>
   );

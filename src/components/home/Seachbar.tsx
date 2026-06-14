@@ -5,7 +5,7 @@ interface SearchBarProps {
 
 export default function SearchBar({ value = "", onChange }: SearchBarProps) {
   return (
-    <div className="flex items-center gap-1.5 w-full lg:w-[604px] h-12 lg:h-14 px-5 lg:px-6 bg-white rounded-full shadow-md">
+    <div className="flex items-center gap-1.5 w-[349px] lg:w-[604px] h-12 lg:h-14 px-5 lg:px-6 bg-white rounded-full shadow-md">
       <svg
         width="20"
         height="20"

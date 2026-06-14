@@ -93,13 +93,15 @@ export default function Header({ scrolled = false }: HeaderProps) {
           <Link
             href="/login"
             style={{
-              fontSize: "14px",
+              fontSize: "16px",
+              width: "163px",
+              height: "48px",
               fontWeight: 700,
               lineHeight: "30px",
               letterSpacing: "-0.02em",
             }}
             className={[
-              "flex items-center justify-center px-4 lg:px-8 h-10 lg:h-12 rounded-[100px] transition-colors",
+              "flex items-center justify-center rounded-[100px] transition-colors",
               scrolled
                 ? "border-2 border-[#D5D7DA] text-[#0A0D12] hover:bg-neutral-50"
                 : "border-2 border-[#D5D7DA] text-white       hover:bg-white/10",
@@ -110,13 +112,15 @@ export default function Header({ scrolled = false }: HeaderProps) {
           <Link
             href="/register"
             style={{
-              fontSize: "14px",
+              width: "163px",
+              height: "48px",
+              fontSize: "16px",
               fontWeight: 700,
               lineHeight: "30px",
               letterSpacing: "-0.02em",
             }}
             className={[
-              "flex items-center justify-center px-4 lg:px-8 h-10 lg:h-12 rounded-[100px] transition-colors",
+              "flex items-center justify-center rounded-[100px] transition-colors",
               scrolled
                 ? "bg-[#C12116] text-white       hover:bg-red-700"
                 : "bg-white     text-[#0A0D12]   hover:bg-neutral-100",
