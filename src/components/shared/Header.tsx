@@ -49,7 +49,7 @@ export default function Header({ scrolled = false }: HeaderProps) {
         <div className="flex items-center gap-6 w-[193px] h-12">
           <Link href="/cart" className="relative flex-shrink-0 w-8 h-8">
             <ShoppingBag
-              size={32}
+              size={28}
               strokeWidth={1.75}
               className={scrolled ? "text-neutral-950" : "text-white"}
             />
@@ -59,49 +59,59 @@ export default function Header({ scrolled = false }: HeaderProps) {
               </span>
             )}
           </Link>
-
-          <div className="flex items-center gap-4 w-[137px] h-12">
-            <div className="relative w-12 h-12 rounded-[--radius-full] overflow-hidden bg-neutral-200 flex-shrink-0">
-              {user?.avatar && (
-                <Image
-                  src={user.avatar}
-                  alt={user.name ?? "User"}
-                  fill
-                  sizes="48px"
-                  className="object-cover"
-                />
-              )}
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 flex-shrink-0"
+          >
+            <div className="relative w-10 h-10 lg:w-12 lg:h-12 rounded-full overflow-hidden bg-neutral-200 flex-shrink-0">
+              <Image
+                src={user?.avatar || "/John-doe.svg"}
+                alt={user?.name ?? "User"}
+                fill
+                sizes="48px"
+                className="object-cover"
+                unoptimized
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-primary">
+                <span className="text-white font-bold text-sm">
+                  {user?.name?.[0]?.toUpperCase() ?? "U"}
+                </span>
+              </div>
             </div>
             <span
               style={{
-                fontSize: "18px",
+                fontSize: "16px",
                 fontWeight: 600,
                 lineHeight: "32px",
                 letterSpacing: "-0.02em",
               }}
               className={[
-                "truncate",
+                "hidden lg:block",
                 scrolled ? "text-[#0A0D12]" : "text-white",
               ].join(" ")}
             >
               {user?.name ?? "User"}
             </span>
-          </div>
+          </Link>
         </div>
       ) : (
-        <div className="flex items-center gap-4 h-12">
+        /* BEFORE LOGIN: */
+        <div className="flex items-center gap-3 lg:gap-4">
           <Link
             href="/login"
             style={{
-              fontSize: "16px",
               width: "163px",
               height: "48px",
+              fontSize: "16px",
               fontWeight: 700,
               lineHeight: "30px",
               letterSpacing: "-0.02em",
             }}
             className={[
-              "flex items-center justify-center rounded-[100px] transition-colors",
+              "hidden sm:flex items-center justify-center rounded-[100px] transition-colors",
               scrolled
                 ? "border-2 border-[#D5D7DA] text-[#0A0D12] hover:bg-neutral-50"
                 : "border-2 border-[#D5D7DA] text-white       hover:bg-white/10",
@@ -112,18 +122,16 @@ export default function Header({ scrolled = false }: HeaderProps) {
           <Link
             href="/register"
             style={{
-              width: "163px",
-              height: "48px",
               fontSize: "16px",
               fontWeight: 700,
               lineHeight: "30px",
               letterSpacing: "-0.02em",
             }}
             className={[
-              "flex items-center justify-center rounded-[100px] transition-colors",
+              "flex items-center justify-center px-6 sm:px-0 sm:w-[163px] h-12 rounded-[100px] transition-colors",
               scrolled
-                ? "bg-[#C12116] text-white       hover:bg-red-700"
-                : "bg-white     text-[#0A0D12]   hover:bg-neutral-100",
+                ? "bg-[#C12116] text-white     hover:bg-red-700"
+                : "bg-white     text-[#0A0D12] hover:bg-neutral-100",
             ].join(" ")}
           >
             Sign Up

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { useAuthStore, AuthState } from "../../store/authStore";
-
+import { useAuthStore } from "@/store/authStore";
+import type { AuthState } from "@/store/authStore";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -13,22 +13,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     const url: string = err.config?.url ?? "";
+    const method: string = (err.config?.method ?? "get").toLowerCase();
     const status: number = err.response?.status;
 
-    const isAuthRequired =
+    if (status !== 401) return Promise.reject(err);
+
+    if (url.startsWith("/api/resto")) return Promise.reject(err);
+
+    if (method === "get") return Promise.reject(err);
+
+    const isStrictlyAuthRequired =
       url.includes("/api/auth/profile") ||
       url.includes("/api/cart") ||
       url.includes("/api/order") ||
       url.includes("/api/review");
 
-    if (status === 401 && isAuthRequired) {
+    if (isStrictlyAuthRequired) {
       (useAuthStore.getState() as AuthState).clearAuth();
-      if (typeof window !== "undefined") {
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/login")
+      ) {
         window.location.href = "/login";
       }
     }

@@ -1,53 +1,61 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/authStore";
-import type { UpdateProfilePayload } from "@/types";
+import type { User } from "@/types";
 
-
-export const authKeys = {
-  all: ["auth"] as const,
-  profile: () => [...authKeys.all, "profile"] as const,
-};
-export function useProfile() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  return useQuery({
-    queryKey: authKeys.profile(),
-    queryFn: authApi.getProfile,
-    enabled: isAuthenticated,
-    staleTime: 10 * 60 * 1000,
-  });
-}
-
+// ── Login 
 export function useLogin() {
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const { setAuth } = useAuthStore();
   return useMutation({
-    mutationFn: authApi.login,
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      authApi.login(email, password),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      const raw = data as unknown as Record<string, unknown>;
+      const inner = (raw.data ?? raw) as Record<string, unknown>;
+      const user = (inner.user ?? inner) as User;
+      const token = (inner.token ?? inner.accessToken ?? raw.token) as string;
+      if (user && token) setAuth(user, token);
     },
   });
 }
 
+// ── Register 
 export function useRegister() {
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const { setAuth } = useAuthStore();
   return useMutation({
-    mutationFn: authApi.register,
+    mutationFn: ({
+      name,
+      email,
+      phone,
+      password,
+    }: {
+      name: string;
+      email: string;
+      phone?: string;
+      password: string;
+    }) => authApi.register(name, email, password, phone),
     onSuccess: (data) => {
-      setAuth(data.user, data.token);
+      const raw = data as unknown as Record<string, unknown>;
+      const inner = (raw.data ?? raw) as Record<string, unknown>;
+      const user = (inner.user ?? inner) as User;
+      const token = (inner.token ?? inner.accessToken ?? raw.token) as string;
+      if (user && token) setAuth(user, token);
     },
   });
 }
 
-export function useUpdateProfile() {
-  const queryClient = useQueryClient();
-  const setAuth = useAuthStore((s) => s.setAuth);
-  const token = useAuthStore((s) => s.token);
-
-  return useMutation({
-    mutationFn: (body: UpdateProfilePayload) => authApi.updateProfile(body),
-    onSuccess: (updatedUser) => {
-      queryClient.setQueryData(authKeys.profile(), updatedUser);
-     if (token) setAuth(updatedUser, token);
+// ── Profile 
+export function useProfile() {
+  const { token } = useAuthStore();
+  return useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const data = await authApi.getProfile();
+      const raw = data as unknown as Record<string, unknown>;
+      return (
+        ((raw.data ?? raw) as Record<string, unknown>).user ?? raw.data ?? raw
+      );
     },
+    enabled: !!token,
   });
 }

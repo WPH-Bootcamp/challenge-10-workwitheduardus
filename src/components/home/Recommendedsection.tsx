@@ -6,41 +6,19 @@ import RestaurantCard from "@/components/shared/RestaurantCard";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios";
 import type { Restaurant } from "@/types";
-function extractList(axiosData: unknown): Restaurant[] {
-  if (!axiosData) return [];
 
-  // Already an array
-  if (Array.isArray(axiosData)) return axiosData;
+function extractList(raw: unknown): Restaurant[] {
+  if (!raw || typeof raw !== "object") return [];
+  if (Array.isArray(raw)) return raw as Restaurant[];
+  const o = raw as Record<string, unknown>;
 
-  if (typeof axiosData === "object") {
-    const obj = axiosData as Record<string, unknown>;
-
-    // ACTUAL shape: { success, message, data: { restaurants: [], pagination: {} } }
-    if (obj.data && typeof obj.data === "object") {
-      const inner = obj.data as Record<string, unknown>;
-
-      if (Array.isArray(inner.restaurants))
-        return inner.restaurants as Restaurant[];
-      if (Array.isArray(inner.data)) return inner.data as Restaurant[];
-      if (Array.isArray(inner.items)) return inner.items as Restaurant[];
-      if (Array.isArray(inner.list)) return inner.list as Restaurant[];
-      // data itself is the array
-      if (Array.isArray(inner)) return inner as Restaurant[];
-    }
-
-    // Flat: { data: [] }
-    if (Array.isArray(obj.data)) return obj.data as Restaurant[];
-
-    // Flat: { restaurants: [] }
-    for (const key of ["restaurants", "items", "result", "results", "list"]) {
-      if (Array.isArray(obj[key])) return obj[key] as Restaurant[];
-    }
+  if (o.data && typeof o.data === "object") {
+    const d = o.data as Record<string, unknown>;
+    if (Array.isArray(d.restaurants)) return d.restaurants as Restaurant[];
+    if (Array.isArray(d.data)) return d.data as Restaurant[];
+    if (Array.isArray(d.items)) return d.items as Restaurant[];
   }
-
-  console.warn(
-    "[Foody] extractList — unhandled shape:",
-    JSON.stringify(axiosData).slice(0, 300),
-  );
+  if (Array.isArray(o.data)) return o.data as Restaurant[];
   return [];
 }
 
@@ -61,6 +39,65 @@ interface RecommendedSectionProps {
   categoryId: string | null;
 }
 
+async function fetchByCategory(
+  categoryId: string | null,
+  page: number,
+  limit: number,
+): Promise<Restaurant[]> {
+  if (!categoryId || categoryId === "all") {
+    try {
+      const r = await api.get("/api/resto/best-seller", {
+        params: { page: 1, limit },
+      });
+      const items = extractList(r.data);
+      if (items.length > 0) return items;
+    } catch {
+    }
+
+    const r = await api.get("/api/resto", { params: { page, limit } });
+    return extractList(r.data);
+  }
+
+  if (categoryId === "bestseller") {
+    const r = await api.get("/api/resto/best-seller", {
+      params: { page, limit },
+    });
+    return extractList(r.data);
+  }
+
+  if (categoryId === "nearby") {
+    try {
+      const r = await api.get("/api/resto/nearby", { params: { limit } });
+      const items = extractList(r.data);
+      if (items.length > 0) return items;
+    } catch {
+    }
+    return [];
+  }
+
+  const categoryNames: Record<string, string> = {
+    lunch: "Lunch",
+    discount: "Discount",
+    delivery: "Delivery",
+  };
+  const catName = categoryNames[categoryId] ?? categoryId;
+
+  try {
+    const r = await api.get("/api/resto", {
+      params: { category: catName, page, limit },
+    });
+    const items = extractList(r.data);
+    if (items.length > 0) return items;
+
+    const r2 = await api.get("/api/resto", {
+      params: { category: catName.toLowerCase(), page, limit },
+    });
+    return extractList(r2.data);
+  } catch {
+    return [];
+  }
+}
+
 export default function RecommendedSection({
   categoryId,
 }: RecommendedSectionProps) {
@@ -73,33 +110,13 @@ export default function RecommendedSection({
     isError,
   } = useQuery<Restaurant[]>({
     queryKey: ["resto-section", categoryId, page],
-    queryFn: async () => {
-      if (categoryId) {
-        const r = await api.get("/api/resto", {
-          params: { category: categoryId, page, limit: PAGE_SIZE },
-        });
-        return extractList(r.data);
-      }
-
-      // Try best-seller first
-      try {
-        const r = await api.get("/api/resto/best-seller", {
-          params: { page: 1, limit: PAGE_SIZE },
-        });
-        const items = extractList(r.data);
-        if (items.length > 0) return items;
-      } catch {
-      }
-
-      const r = await api.get("/api/resto", {
-        params: { page, limit: PAGE_SIZE },
-      });
-      return extractList(r.data);
-    },
-    staleTime: 5 * 60 * 1000,
+    queryFn: () => fetchByCategory(categoryId, page, PAGE_SIZE),
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
   });
 
-  const hasMore = list.length >= PAGE_SIZE;
+  const safeList = Array.isArray(list) ? list : [];
+  const hasMore = safeList.length >= PAGE_SIZE;
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8 w-full">
@@ -112,7 +129,7 @@ export default function RecommendedSection({
           Recommended
         </h2>
         <Link
-          href="/restaurants"
+          href="/category"
           style={{
             fontSize: "18px",
             fontWeight: 800,
@@ -125,7 +142,7 @@ export default function RecommendedSection({
         </Link>
       </div>
 
-      {/* Skeletons */}
+      {/* Skeletons while loading */}
       {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -134,30 +151,25 @@ export default function RecommendedSection({
         </div>
       )}
 
-      {/* Error */}
-      {isError && (
-        <p className="text-[16px] text-red-500 text-center py-10">
-          Gagal memuat restoran. Periksa koneksi atau coba lagi.
-        </p>
-      )}
-
       {/* Cards */}
-      {!isLoading && !isError && (
+      {!isLoading && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {list.map((r) => (
+            {safeList.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} />
             ))}
           </div>
 
-          {list.length === 0 && (
-            <p className="text-[16px] text-neutral-500 text-center py-10">
-              Tidak ada restoran ditemukan.
+          {safeList.length === 0 && (
+            <p className="text-[14px] text-neutral-500 text-center py-8">
+              {categoryId === "nearby"
+                ? "Login terlebih dahulu untuk melihat restoran terdekat."
+                : "Tidak ada restoran ditemukan."}
             </p>
           )}
 
           {hasMore && (
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-2">
               <button
                 onClick={() => setPage((p) => p + 1)}
                 style={{

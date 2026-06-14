@@ -3,13 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { MapPin, ShoppingBag, ClipboardList, LogOut } from "lucide-react";
+import { MapPin, ClipboardList, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
 const NAV = [
   { label: "Delivery Address", icon: MapPin, href: "/profile" },
   { label: "My Orders", icon: ClipboardList, href: "/orders" },
-  { label: "My Cart", icon: ShoppingBag, href: "/cart" },
 ];
 
 export default function Sidebar() {
@@ -23,60 +22,64 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-full lg:w-[260px] flex-shrink-0">
-      <div className="bg-white rounded-2xl shadow-[0px_0px_20px_rgba(203,202,202,0.25)] p-6 flex flex-col gap-6">
-        {/* User info */}
-        <div className="flex items-center gap-3">
-          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-neutral-200 flex-shrink-0">
+    <aside className="w-full lg:w-[240px] flex-shrink-0">
+      <div className="bg-white rounded-2xl shadow-[0px_0px_20px_rgba(203,202,202,0.25)] overflow-hidden">
+        {/* User info — matches Figma profile card top */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-neutral-100">
+          <div className="relative w-[44px] h-[44px] rounded-full overflow-hidden bg-neutral-200 flex-shrink-0">
             {user?.avatar ? (
               <Image
                 src={user.avatar}
-                alt={user.name}
+                alt={user.name ?? "User"}
                 fill
-                sizes="48px"
+                sizes="44px"
                 className="object-cover"
                 unoptimized
               />
             ) : (
-              <div className="w-full h-full bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
-                  {user?.name?.[0]?.toUpperCase() ?? "U"}
-                </span>
-              </div>
+              <Image
+                src="/John-doe.svg"
+                alt={user?.name ?? "User"}
+                fill
+                sizes="44px"
+                className="object-cover"
+                unoptimized
+              />
             )}
+            {/* initials fallback */}
+            <div className="absolute inset-0 flex items-center justify-center bg-primary -z-10">
+              <span className="text-white font-bold">
+                {user?.name?.[0]?.toUpperCase() ?? "U"}
+              </span>
+            </div>
           </div>
-          <div>
+          <div className="min-w-0">
             <p
-              style={{ fontSize: "16px", fontWeight: 700 }}
-              className="text-neutral-950"
+              style={{ fontSize: "14px", fontWeight: 700 }}
+              className="text-neutral-950 truncate"
             >
               {user?.name ?? "User"}
-            </p>
-            <p style={{ fontSize: "12px" }} className="text-neutral-500">
-              {user?.email ?? ""}
             </p>
           </div>
         </div>
 
-        <div className="w-full h-px bg-neutral-200" />
-
-        {/* Nav links */}
-        <nav className="flex flex-col gap-1">
+        {/* Nav */}
+        <nav className="flex flex-col py-2">
           {NAV.map(({ label, icon: Icon, href }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
+            const active = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
                 className={[
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-colors",
+                  "flex items-center gap-3 px-5 py-3.5 transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary/5 text-primary border-l-2 border-primary"
                     : "text-neutral-700 hover:bg-neutral-50",
                 ].join(" ")}
               >
                 <Icon
-                  size={18}
+                  size={16}
                   className={active ? "text-primary" : "text-neutral-500"}
                 />
                 <span
@@ -91,9 +94,9 @@ export default function Sidebar() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 hover:bg-red-50 hover:text-primary transition-colors w-full"
+            className="flex items-center gap-3 px-5 py-3.5 text-neutral-700 hover:bg-red-50 hover:text-primary transition-colors w-full"
           >
-            <LogOut size={18} className="text-neutral-500" />
+            <LogOut size={16} className="text-neutral-500" />
             <span style={{ fontSize: "14px", fontWeight: 500 }}>Logout</span>
           </button>
         </nav>
