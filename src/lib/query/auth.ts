@@ -3,13 +3,14 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/authStore";
 import type { User } from "@/types";
 
-// ── Login 
+// ── Login ─────────────────────────────────────────────────────────────────────
 export function useLogin() {
   const { setAuth } = useAuthStore();
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authApi.login(email, password),
     onSuccess: (data) => {
+      // API shape: { success, data: { user: {...}, token: '...' } }
       const raw = data as unknown as Record<string, unknown>;
       const inner = (raw.data ?? raw) as Record<string, unknown>;
       const user = (inner.user ?? inner) as User;
@@ -19,7 +20,7 @@ export function useLogin() {
   });
 }
 
-// ── Register 
+// ── Register ──────────────────────────────────────────────────────────────────
 export function useRegister() {
   const { setAuth } = useAuthStore();
   return useMutation({
@@ -44,7 +45,7 @@ export function useRegister() {
   });
 }
 
-// ── Profile 
+// ── Profile ───────────────────────────────────────────────────────────────────
 export function useProfile() {
   const { token } = useAuthStore();
   return useQuery({

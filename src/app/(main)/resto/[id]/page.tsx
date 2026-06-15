@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Star, MapPin, Share2, Plus, Minus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import api from "@/lib/api/axios";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
+import { useAuthStore } from "@/store/authStore";
 
 // ─── Types 
 interface RestoDetail {
@@ -19,10 +20,13 @@ interface RestoDetail {
   image?: string;
   star?: number;
   rating?: number;
+  averageRating?: number;
   place?: string;
   location?: string;
   distance?: string;
   reviewCount?: number;
+  menus?: MenuItem[];
+  reviews?: ReviewItem[];
 }
 interface MenuItem {
   id: string;
@@ -39,31 +43,6 @@ interface ReviewItem {
   rating?: number;
   comment?: string;
   createdAt?: string;
-}
-
-// ─── Helpers 
-function extractSingle(raw: unknown): Record<string, unknown> | null {
-  if (!raw || typeof raw !== "object") return null;
-  const o = raw as Record<string, unknown>;
-  if (o.data && typeof o.data === "object" && !Array.isArray(o.data)) {
-    const d = o.data as Record<string, unknown>;
-    return (d.restaurant ?? d) as Record<string, unknown>;
-  }
-  return o;
-}
-
-function extractList(raw: unknown, ...keys: string[]): unknown[] {
-  if (!raw || typeof raw !== "object") return [];
-  if (Array.isArray(raw)) return raw;
-  const o = raw as Record<string, unknown>;
-  if (o.data && typeof o.data === "object") {
-    const d = o.data as Record<string, unknown>;
-    for (const k of keys) if (Array.isArray(d[k])) return d[k] as unknown[];
-    if (Array.isArray(d.data)) return d.data as unknown[];
-  }
-  for (const k of keys) if (Array.isArray(o[k])) return o[k] as unknown[];
-  if (Array.isArray(o.data)) return o.data as unknown[];
-  return [];
 }
 
 const fmt = (n: number) =>
@@ -126,10 +105,7 @@ function MenuCard({
           </div>
         )}
       </div>
-
-      {/* Card body */}
       <div className="p-3 flex flex-col gap-2">
-        {/* Food name */}
         <p
           style={{
             fontSize: "13px",
@@ -141,20 +117,16 @@ function MenuCard({
         >
           {item.name}
         </p>
-
-        {/* Price */}
         <p
           style={{ fontSize: "13px", fontWeight: 600 }}
           className="text-primary"
         >
           {fmt(item.price)}
         </p>
-
-        {/* Add / Qty controls */}
         {qty === 0 ? (
           <button
             onClick={onAdd}
-            className="w-full h-8 bg-[#C12116] rounded-full flex items-center justify-center gap-1 hover:bg-red-700 active:bg-red-800 transition-colors"
+            className="w-full h-8 bg-[#C12116] rounded-full flex items-center justify-center gap-1 hover:bg-red-700 transition-colors"
           >
             <Plus size={12} className="text-white" strokeWidth={3} />
             <span
@@ -195,74 +167,86 @@ function MenuCard({
 export default function RestoDetailPage() {
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("All Menu");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [reviewPage, setReviewPage] = useState(1);
 
-  // ── Fetch restaurant detail 
   const { data: rawResto, isLoading: loadingResto } = useQuery({
-    queryKey: ["resto", id],
+    queryKey: ["resto-detail", id],
     queryFn: async () => {
       const r = await api.get(`/api/resto/${id}`);
       return r.data;
     },
     enabled: !!id,
   });
-  const resto = extractSingle(rawResto) as RestoDetail | null;
 
-  const { data: rawMenuAll } = useQuery({
-    queryKey: ["menu-all", id],
-    queryFn: async () => {
-      const r = await api.get(`/api/resto/${id}/menu`);
-      return r.data;
-    },
-    enabled: !!id,
-  });
-  const allMenuItems = extractList(
-    rawMenuAll,
-    "menus",
-    "menu",
-    "items",
-    "data",
-  ) as MenuItem[];
+  const restoData = (rawResto?.data ?? rawResto) as RestoDetail | null;
 
-  // Client-side tab filter
+  const allMenuItems: MenuItem[] = Array.isArray(restoData?.menus)
+    ? restoData.menus
+    : [];
+
   const menuItems =
     activeTab === "All Menu"
       ? allMenuItems
       : allMenuItems.filter((item) => {
           const cat = (item.category ?? "").toLowerCase();
-          if (activeTab === "Food")
-            return (
-              cat === "food" ||
-              cat === "makanan" ||
-              (!cat.includes("drink") && !cat.includes("minuman"))
-            );
           if (activeTab === "Drink")
-            return cat === "drink" || cat === "minuman";
+            return cat === "drink" || cat === "minuman" || cat === "beverage";
+          if (activeTab === "Food")
+            return cat !== "drink" && cat !== "minuman" && cat !== "beverage";
           return true;
         });
 
-  // ── Fetch reviews 
+  // ── Reviews 
   const { data: rawReviews } = useQuery({
     queryKey: ["reviews", id, reviewPage],
     queryFn: async () => {
-      const r = await api.get("/api/review", {
-        params: { restaurantId: id, page: reviewPage, limit: 6 },
-      });
-      return r.data;
+      const endpoints = [
+        { url: `/api/review/${id}`, params: { page: reviewPage, limit: 6 } },
+        {
+          url: "/api/review",
+          params: { restoId: id, page: reviewPage, limit: 6 },
+        },
+        {
+          url: "/api/review",
+          params: { restaurantId: id, page: reviewPage, limit: 6 },
+        },
+        {
+          url: `/api/resto/${id}/review`,
+          params: { page: reviewPage, limit: 6 },
+        },
+      ];
+      for (const ep of endpoints) {
+        try {
+          const r = await api.get(ep.url, { params: ep.params });
+          if (r.data?.success !== false) return r.data;
+        } catch {
+        }
+      }
+      return null;
     },
-    enabled: !!id,
+    enabled: !!id && isAuthenticated,
+    retry: false,
   });
-  const reviews = extractList(
-    rawReviews,
-    "reviews",
-    "review",
-    "items",
-  ) as ReviewItem[];
 
-  // ── Add to cart mutation 
+  const reviews: ReviewItem[] = (() => {
+    if (Array.isArray(restoData?.reviews)) return restoData.reviews;
+    if (!rawReviews) return [];
+    if (Array.isArray(rawReviews)) return rawReviews;
+    const d = rawReviews?.data ?? rawReviews;
+    if (!d || typeof d !== "object") return [];
+    const o = d as Record<string, unknown>;
+    for (const k of ["reviews", "review", "items", "data", "list"]) {
+      if (Array.isArray(o[k])) return o[k] as ReviewItem[];
+    }
+    return [];
+  })();
+
+  // ── Cart mutations 
   const { mutate: addToCartMutation } = useMutation({
     mutationFn: (payload: {
       menuId: string;
@@ -273,28 +257,24 @@ export default function RestoDetailPage() {
   });
 
   const handleAdd = (item: MenuItem) => {
-    setQuantities((prev) => {
-      const newQty = (prev[item.id] ?? 0) + 1;
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+    const newQty = (quantities[item.id] ?? 0) + 1;
+    setQuantities((prev) => ({ ...prev, [item.id]: newQty }));
+    addToCartMutation({ menuId: item.id, restaurantId: id, quantity: newQty });
+  };
+
+  const handleMinus = (item: MenuItem) => {
+    const newQty = Math.max(0, (quantities[item.id] ?? 0) - 1);
+    setQuantities((prev) => ({ ...prev, [item.id]: newQty }));
+    if (newQty > 0)
       addToCartMutation({
         menuId: item.id,
         restaurantId: id,
         quantity: newQty,
       });
-      return { ...prev, [item.id]: newQty };
-    });
-  };
-
-  const handleMinus = (item: MenuItem) => {
-    setQuantities((prev) => {
-      const newQty = Math.max(0, (prev[item.id] ?? 0) - 1);
-      if (newQty > 0)
-        addToCartMutation({
-          menuId: item.id,
-          restaurantId: id,
-          quantity: newQty,
-        });
-      return { ...prev, [item.id]: newQty };
-    });
   };
 
   const totalItems = Object.values(quantities).reduce((a, b) => a + b, 0);
@@ -303,10 +283,13 @@ export default function RestoDetailPage() {
     return sum + (item?.price ?? 0) * qty;
   }, 0);
 
-  const ratingVal = Number(resto?.star ?? resto?.rating ?? 0);
-  const imgMain = resto?.images?.[0] || resto?.logo || resto?.image || "";
-  const imgSm1 = resto?.images?.[1] || "";
-  const imgSm2 = resto?.images?.[2] || "";
+  const ratingVal = Number(
+    restoData?.averageRating ?? restoData?.star ?? restoData?.rating ?? 0,
+  );
+  const imgMain =
+    restoData?.images?.[0] || restoData?.logo || restoData?.image || "";
+  const imgSm1 = restoData?.images?.[1] || "";
+  const imgSm2 = restoData?.images?.[2] || "";
 
   if (loadingResto) {
     return (
@@ -321,21 +304,21 @@ export default function RestoDetailPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Header scrolled />
       </div>
-
       <div className="h-16 lg:h-20 flex-shrink-0" />
 
+      {/* Hero images */}
       <div
         className="w-full grid grid-cols-2 gap-1 flex-shrink-0"
         style={{ height: "280px" }}
       >
         <div
-          className="relative bg-neutral-200 overflow-hidden lg:h-[380px]"
+          className="relative bg-neutral-200 overflow-hidden"
           style={{ height: "280px" }}
         >
           {imgMain ? (
             <Image
               src={imgMain}
-              alt={resto?.name ?? ""}
+              alt={restoData?.name ?? "Restaurant"}
               fill
               sizes="50vw"
               className="object-cover"
@@ -351,7 +334,7 @@ export default function RestoDetailPage() {
               {src ? (
                 <Image
                   src={src}
-                  alt=""
+                  alt={`${restoData?.name ?? ""} photo ${i + 2}`}
                   fill
                   sizes="25vw"
                   className="object-cover"
@@ -365,15 +348,14 @@ export default function RestoDetailPage() {
         </div>
       </div>
 
-      {/* ── Restaurant info  */}
+      {/* Restaurant info */}
       <div className="px-4 lg:px-[120px] py-5 flex items-start justify-between gap-4 border-b border-neutral-100">
         <div className="flex items-center gap-3 lg:gap-4">
-          {/* Logo */}
           <div className="relative w-[56px] h-[56px] lg:w-[72px] lg:h-[72px] rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200 flex-shrink-0">
-            {resto?.logo || resto?.image ? (
+            {restoData?.logo || restoData?.image ? (
               <Image
-                src={resto.logo || resto.image || ""}
-                alt={resto?.name ?? ""}
+                src={restoData.logo || restoData.image || ""}
+                alt={restoData?.name ?? ""}
                 fill
                 sizes="72px"
                 className="object-cover"
@@ -383,7 +365,6 @@ export default function RestoDetailPage() {
               <div className="w-full h-full bg-neutral-200" />
             )}
           </div>
-
           <div className="flex flex-col gap-1">
             <h1
               style={{
@@ -394,9 +375,8 @@ export default function RestoDetailPage() {
               }}
               className="text-neutral-950"
             >
-              {resto?.name ?? "—"}
+              {restoData?.name ?? "—"}
             </h1>
-
             <div className="flex items-center gap-1">
               <Star size={14} className="fill-[#FFAB0D] text-[#FFAB0D]" />
               <span
@@ -405,42 +385,38 @@ export default function RestoDetailPage() {
               >
                 {ratingVal}
               </span>
-              {resto?.reviewCount != null && (
+              {restoData?.reviewCount != null && (
                 <span style={{ fontSize: "12px" }} className="text-neutral-400">
-                  ({resto.reviewCount} Ulasan)
+                  ({restoData.reviewCount} Ulasan)
                 </span>
               )}
             </div>
-
             <div className="flex items-center gap-1">
               <MapPin size={12} className="text-neutral-400" />
               <span
                 style={{ fontSize: "12px", letterSpacing: "-0.02em" }}
                 className="text-neutral-600"
               >
-                {resto?.place ?? resto?.location ?? "—"}
-                {resto?.distance ? ` · ${resto.distance}` : ""}
+                {restoData?.place ?? restoData?.location ?? "—"}
+                {restoData?.distance ? ` · ${restoData.distance}` : ""}
               </span>
             </div>
           </div>
         </div>
-
         <button className="flex items-center gap-1 text-neutral-500 hover:text-neutral-700 mt-1 flex-shrink-0">
           <Share2 size={15} />
           <span style={{ fontSize: "12px", fontWeight: 500 }}>Share</span>
         </button>
       </div>
 
-      {/* ── Menu section  */}
+      {/* Menu section */}
       <div className="px-4 lg:px-[120px] py-6 flex flex-col gap-5">
-        {/* Section heading */}
         <h2
           style={{ fontSize: "22px", fontWeight: 800, lineHeight: "30px" }}
           className="text-neutral-950"
         >
           Menu
         </h2>
-
         <div className="flex items-center gap-2">
           {TABS.map((tab) => (
             <button
@@ -475,7 +451,6 @@ export default function RestoDetailPage() {
                 />
               ))}
             </div>
-
             {allMenuItems.length > 8 && activeTab === "All Menu" && (
               <div className="flex justify-center mt-2">
                 <button
@@ -497,9 +472,8 @@ export default function RestoDetailPage() {
         )}
       </div>
 
-      {/* ── Review section  */}
+      {/* Review section */}
       <div className="px-4 lg:px-[120px] pb-8 flex flex-col gap-5">
-        {/* Section heading + avg rating */}
         <div className="flex items-center justify-between">
           <h2
             style={{ fontSize: "22px", fontWeight: 800, lineHeight: "30px" }}
@@ -514,18 +488,33 @@ export default function RestoDetailPage() {
                 style={{ fontSize: "13px", fontWeight: 700 }}
                 className="text-neutral-950"
               >
-                {ratingVal} ({resto?.reviewCount ?? 0} Ulasan)
+                {ratingVal} ({restoData?.reviewCount ?? 0} Ulasan)
               </span>
             </div>
           )}
         </div>
 
-        {reviews.length > 0 ? (
+        {!isAuthenticated ? (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <p
+              style={{ fontSize: "14px" }}
+              className="text-neutral-500 text-center"
+            >
+              Login untuk melihat ulasan
+            </p>
+            <Link
+              href="/login"
+              className="px-6 h-10 bg-primary rounded-full text-white font-bold text-[14px] flex items-center hover:bg-red-700 transition-colors"
+            >
+              Login
+            </Link>
+          </div>
+        ) : reviews.length > 0 ? (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {reviews.map((rv) => (
+              {reviews.map((rv, idx) => (
                 <div
-                  key={rv.id}
+                  key={rv.id ?? idx}
                   className="flex flex-col gap-3 p-4 border border-neutral-200 rounded-2xl"
                 >
                   <div className="flex items-center gap-3">
@@ -533,7 +522,7 @@ export default function RestoDetailPage() {
                       {rv.userAvatar ? (
                         <Image
                           src={rv.userAvatar}
-                          alt={rv.userName ?? ""}
+                          alt={rv.userName ?? "User"}
                           fill
                           sizes="40px"
                           className="object-cover"
@@ -563,8 +552,6 @@ export default function RestoDetailPage() {
                             day: "numeric",
                             month: "long",
                             year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
                           })}
                         </p>
                       )}
@@ -583,7 +570,6 @@ export default function RestoDetailPage() {
                 </div>
               ))}
             </div>
-
             {reviews.length >= 6 && (
               <div className="flex justify-center">
                 <button
@@ -607,6 +593,8 @@ export default function RestoDetailPage() {
       </div>
 
       <Footer />
+
+      {/* Floating checkout bar */}
       {totalItems > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 px-4 lg:px-[120px] pb-5 pointer-events-none">
           <Link
