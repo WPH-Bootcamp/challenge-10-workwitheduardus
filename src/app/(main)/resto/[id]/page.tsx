@@ -28,13 +28,16 @@ interface RestoDetail {
   menus?: MenuItem[];
   reviews?: ReviewItem[];
 }
+
 interface MenuItem {
   id: string;
-  name: string;
+  name?: string;
+  menuName?: string;
   price: number;
   image?: string;
   category?: string;
 }
+
 interface ReviewItem {
   id: string;
   userName?: string;
@@ -84,6 +87,8 @@ function MenuCard({
   onAdd: () => void;
   onMinus: () => void;
 }) {
+  const itemName = item.name ?? item.menuName ?? "—";
+
   return (
     <div className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-[0px_0px_20px_rgba(203,202,202,0.25)]">
       <div
@@ -93,7 +98,7 @@ function MenuCard({
         {item.image ? (
           <Image
             src={item.image}
-            alt={item.name}
+            alt={itemName}
             fill
             sizes="(max-width:1024px) 50vw, 25vw"
             className="object-cover"
@@ -115,7 +120,7 @@ function MenuCard({
           }}
           className="text-neutral-950 line-clamp-2 min-h-[36px]"
         >
-          {item.name}
+          {itemName}
         </p>
         <p
           style={{ fontSize: "13px", fontWeight: 600 }}
@@ -201,7 +206,6 @@ export default function RestoDetailPage() {
           return true;
         });
 
-  // ── Reviews 
   const { data: rawReviews } = useQuery({
     queryKey: ["reviews", id, reviewPage],
     queryFn: async () => {
@@ -225,6 +229,7 @@ export default function RestoDetailPage() {
           const r = await api.get(ep.url, { params: ep.params });
           if (r.data?.success !== false) return r.data;
         } catch {
+          /* try next */
         }
       }
       return null;
@@ -246,14 +251,19 @@ export default function RestoDetailPage() {
     return [];
   })();
 
-  // ── Cart mutations 
   const { mutate: addToCartMutation } = useMutation({
     mutationFn: (payload: {
       menuId: string;
       restaurantId: string;
       quantity: number;
     }) => api.post("/api/cart", payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["cart"] });
+      console.log("[DETAIL] Item added to cart, invalidated cache");
+    },
+    onError: (error: Error) => {
+      console.error("[DETAIL] Add to cart error:", error.message);
+    },
   });
 
   const handleAdd = (item: MenuItem) => {
@@ -263,6 +273,12 @@ export default function RestoDetailPage() {
     }
     const newQty = (quantities[item.id] ?? 0) + 1;
     setQuantities((prev) => ({ ...prev, [item.id]: newQty }));
+    console.log("[DETAIL] Adding to cart:", {
+      menuId: item.id,
+      name: item.name ?? item.menuName,
+      restaurantId: id,
+      quantity: newQty,
+    });
     addToCartMutation({ menuId: item.id, restaurantId: id, quantity: newQty });
   };
 
@@ -306,7 +322,6 @@ export default function RestoDetailPage() {
       </div>
       <div className="h-16 lg:h-20 flex-shrink-0" />
 
-      {/* Hero images */}
       <div
         className="w-full grid grid-cols-2 gap-1 flex-shrink-0"
         style={{ height: "280px" }}
@@ -348,7 +363,6 @@ export default function RestoDetailPage() {
         </div>
       </div>
 
-      {/* Restaurant info */}
       <div className="px-4 lg:px-[120px] py-5 flex items-start justify-between gap-4 border-b border-neutral-100">
         <div className="flex items-center gap-3 lg:gap-4">
           <div className="relative w-[56px] h-[56px] lg:w-[72px] lg:h-[72px] rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200 flex-shrink-0">
@@ -409,7 +423,6 @@ export default function RestoDetailPage() {
         </button>
       </div>
 
-      {/* Menu section */}
       <div className="px-4 lg:px-[120px] py-6 flex flex-col gap-5">
         <h2
           style={{ fontSize: "22px", fontWeight: 800, lineHeight: "30px" }}
@@ -472,7 +485,6 @@ export default function RestoDetailPage() {
         )}
       </div>
 
-      {/* Review section */}
       <div className="px-4 lg:px-[120px] pb-8 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h2
@@ -594,7 +606,6 @@ export default function RestoDetailPage() {
 
       <Footer />
 
-      {/* Floating checkout bar */}
       {totalItems > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 px-4 lg:px-[120px] pb-5 pointer-events-none">
           <Link
